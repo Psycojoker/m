@@ -1,7 +1,3 @@
-pouet:
-  - 1
-  - 2
-  - 3
-
-popo:
-  - 52
+- description: "j'aime le chocolat"
+- description: "pouet"
+- description: "toto tata"

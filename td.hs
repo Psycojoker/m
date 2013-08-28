@@ -14,7 +14,21 @@ elemToStr (EStr string) = unpackBuf string
 printKeys :: YamlNode -> IO ()
 printKeys = putStr . unlines . getDictKeys . n_elem
 
+parseTodos :: YamlElem -> [String]
+parseTodos (ESeq []) = []
+parseTodos (ESeq (x:xs)) = (getDescription $ n_elem x):(parseTodos (ESeq xs))
+
+getDescription :: YamlElem -> String
+getDescription (EMap []) = ""
+getDescription (EMap ((key, value):xs))
+    | keyStr == "description" = valueStr
+    | otherwise               = getDescription (EMap xs)
+    where valueStr = (elemToStr $ n_elem value)
+          keyStr = (elemToStr $ n_elem key)
+
+printDescriptions = putStr . unlines . parseTodos . n_elem
+
 main = do
     content <- parseYamlFile "pouet.yaml"
-    printKeys content
+    printDescriptions content
     return ()
