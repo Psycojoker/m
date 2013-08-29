@@ -14,9 +14,12 @@ elemToStr (EStr string) = unpackBuf string
 printKeys :: YamlNode -> IO ()
 printKeys = putStr . unlines . getDictKeys . n_elem
 
+foldlESeq :: (a -> YamlElem -> a) -> a -> YamlElem -> a
+foldlESeq function acc (ESeq []) = acc
+foldlESeq function acc (ESeq (x:xs)) = foldlESeq function (function acc $ n_elem x) (ESeq xs)
+
 parseTodos :: YamlElem -> [String]
-parseTodos (ESeq []) = []
-parseTodos (ESeq (x:xs)) = (getDescription $ n_elem x):(parseTodos (ESeq xs))
+parseTodos = foldlESeq (\acc elem -> acc ++ [getDescription elem]) []
 
 getDescription :: YamlElem -> String
 getDescription (EMap []) = ""
