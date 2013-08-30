@@ -18,10 +18,8 @@ parseTodos = foldlESeq (\acc elem -> acc ++ [getDescription elem]) []
 getDescription :: YamlElem -> String
 getDescription (EMap []) = ""
 getDescription (EMap ((key, value):xs))
-    | keyStr == "description" = valueStr
+    | nodeStr key == "description" = nodeStr value
     | otherwise               = getDescription (EMap xs)
-    where valueStr = (elemToStr $ n_elem value)
-          keyStr = (elemToStr $ n_elem key)
 
 printDescriptions = putStr . unlines . parseTodos . n_elem
 
