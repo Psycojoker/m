@@ -1,7 +1,7 @@
 import Utils
 import Data.Yaml.Syck
 
-data Todo = Todo { desciption :: String
+data Todo = Todo { description :: String
                  , done :: Bool
                  } deriving (Show)
 
