@@ -3,6 +3,7 @@ module Utils
 , foldlESeq
 , foldlEMap
 , nodeStr
+, getValue
 ) where
 
 import Data.Yaml.Syck
@@ -10,6 +11,12 @@ import Data.Yaml.Syck
 foldlESeq :: (a -> YamlElem -> a) -> a -> YamlElem -> a
 foldlESeq function acc (ESeq []) = acc
 foldlESeq function acc (ESeq (x:xs)) = foldlESeq function (function acc $ n_elem x) (ESeq xs)
+
+getValue :: YamlElem -> (YamlElem -> Bool) -> YamlElem -> YamlElem
+getValue (EMap []) _ defaultValue = defaultValue
+getValue (EMap ((key, value):xs)) test defaultValue
+    | test $ n_elem key = n_elem value
+    | otherwise         = getValue (EMap xs) test defaultValue
 
 foldlEMap :: (a -> (YamlElem, YamlElem) -> a) -> a -> YamlElem -> a
 foldlEMap function acc (EMap []) = acc
