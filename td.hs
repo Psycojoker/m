@@ -30,11 +30,20 @@ testKey key = (Utils.elemToStr key) == "description"
 numberise :: [String] -> [String]
 numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [1..] s)
 
-printDescriptions :: Yaml.YamlNode -> IO ()
-printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . Yaml.n_elem
+printDescriptions :: [Todo] -> IO ()
+printDescriptions = putStr . unlines . numberise . todosToString
 
-getTodos :: IO Yaml.YamlNode
-getTodos = Yaml.parseYamlFile "pouet.yaml"
+getTodosDB :: IO Yaml.YamlNode
+getTodosDB = Yaml.parseYamlFile "pouet.yaml"
+
+getTodos :: IO [Todo]
+getTodos = (return . parseTodos . Yaml.n_elem) =<< getTodosDB
+
+addTodoToCollection :: String -> [Todo] -> IO ()
+addTodoToCollection _ _ = return ()
+
+addTodo :: [String] -> IO ()
+addTodo _ = getTodos >>= addTodoToCollection "" >> return ()
 
 printTodos :: IO ()
 printTodos = printDescriptions =<< getTodos
@@ -43,6 +52,7 @@ handleCLIArguments :: [String] -> IO ()
 handleCLIArguments [] = printTodos
 handleCLIArguments ("l":xs) = printTodos
 handleCLIArguments ("list":xs) = printTodos
+handleCLIArguments ("add":xs) = addTodo xs
 handleCLIArguments _ = printTodos
 
 main = Environment.getArgs >>= handleCLIArguments
