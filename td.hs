@@ -36,6 +36,7 @@ printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . 
 getTodos :: IO Yaml.YamlNode
 getTodos = Yaml.parseYamlFile "pouet.yaml"
 
+printTodos :: IO ()
 printTodos = printDescriptions =<< getTodos
 
 handleCLIArguments :: [String] -> IO ()
