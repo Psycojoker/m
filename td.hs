@@ -39,11 +39,21 @@ getTodosDB = Yaml.parseYamlFile "pouet.yaml"
 getTodos :: IO [Todo]
 getTodos = (return . parseTodos . Yaml.n_elem) =<< getTodosDB
 
-addTodoToCollection :: String -> [Todo] -> IO ()
-addTodoToCollection _ _ = return ()
+todosToYaml :: [Todo] -> Yaml.YamlNode
+todosToYaml todos = Yaml.mkNode $ Yaml.ESeq $ map (Yaml.mkNode . todoToEmap) todos
 
-addTodo :: [String] -> IO ()
-addTodo _ = getTodos >>= addTodoToCollection "" >> return ()
+todoToEmap :: Todo -> Yaml.YamlElem
+todoToEmap todo = Yaml.EMap [convertDescription, convertDone]
+    where convertDescription = (stringToYamlNode "description", stringToYamlNode $ description todo)
+          convertDone = (stringToYamlNode "done", stringToYamlNode $ show $ done todo)
+          stringToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
+          boolToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
+
+addTodoToCollection :: String -> [Todo] -> [Todo]
+addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False}]
+
+addTodo :: String -> IO ()
+addTodo description = getTodos >>= (Yaml.emitYamlFile "/tmp/caca.yaml" . todosToYaml . addTodoToCollection description)
 
 printTodos :: IO ()
 printTodos = printDescriptions =<< getTodos
@@ -52,7 +62,7 @@ handleCLIArguments :: [String] -> IO ()
 handleCLIArguments [] = printTodos
 handleCLIArguments ("l":xs) = printTodos
 handleCLIArguments ("list":xs) = printTodos
-handleCLIArguments ("add":xs) = addTodo xs
+handleCLIArguments ("add":xs) = addTodo $ unwords xs
 handleCLIArguments _ = printTodos
 
 main = Environment.getArgs >>= handleCLIArguments
