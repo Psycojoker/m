@@ -1,5 +1,5 @@
-import Utils
-import Data.Yaml.Syck
+import Utils(foldlEMap, elemToStr, foldlESeq, getValue)
+import Data.Yaml.Syck(YamlElem, YamlNode, parseYamlFile, n_elem, packBuf, YamlElem(EStr))
 
 data Todo = Todo { description :: String
                  , done :: Bool
