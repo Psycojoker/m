@@ -1,4 +1,5 @@
 import Utils(foldlEMap, elemToStr, foldlESeq, getValue)
+import System.Environment(getArgs)
 import Data.Yaml.Syck(YamlElem, YamlNode, parseYamlFile, n_elem, packBuf, YamlElem(EStr))
 
 data Todo = Todo { description :: String
@@ -32,6 +33,7 @@ numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [
 printDescriptions :: YamlNode -> IO ()
 printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . n_elem
 
-main = do
-    content <- parseYamlFile "pouet.yaml"
-    printDescriptions content
+handleCLIArguments :: [String] -> IO ()
+handleCLIArguments [] = parseYamlFile "pouet.yaml" >>= printDescriptions
+
+main = getArgs >>= handleCLIArguments
