@@ -33,8 +33,13 @@ numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [
 printDescriptions :: Yaml.YamlNode -> IO ()
 printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . Yaml.n_elem
 
+getTodos :: IO Yaml.YamlNode
+getTodos = Yaml.parseYamlFile "pouet.yaml"
 
 handleCLIArguments :: [String] -> IO ()
-handleCLIArguments [] = parseYamlFile "pouet.yaml" >>= printDescriptions
+handleCLIArguments [] = getTodos >>= printDescriptions
+handleCLIArguments ("l":xs) = getTodos >>= printDescriptions
+handleCLIArguments ("list":xs) = getTodos >>= printDescriptions
+handleCLIArguments _ = getTodos >>= printDescriptions
 
 main = Environment.getArgs >>= handleCLIArguments
