@@ -71,6 +71,6 @@ handleCLIArguments ("-h":xs) = displayHelp
 handleCLIArguments ("--help":xs) = displayHelp
 handleCLIArguments ("h":xs) = displayHelp
 handleCLIArguments ("help":xs) = displayHelp
-handleCLIArguments _ = printTodos
+handleCLIArguments other = (putStrLn $ "I don't know this command: '" ++ (unwords other) ++ "'\n") >> displayHelp
 
 main = Environment.getArgs >>= handleCLIArguments
