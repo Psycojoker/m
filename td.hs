@@ -1,39 +1,40 @@
-import Utils(foldlEMap, elemToStr, foldlESeq, getValue)
-import System.Environment(getArgs)
-import Data.Yaml.Syck(YamlElem, YamlNode, parseYamlFile, n_elem, packBuf, YamlElem(EStr))
+import qualified Utils
+import qualified System.Environment as Environment
+import qualified Data.Yaml.Syck as Yaml
 
 data Todo = Todo { description :: String
                  , done :: Bool
                  } deriving (Show)
 
-getDictKeys :: YamlElem -> [String]
-getDictKeys = foldlEMap (\acc (key, value) -> elemToStr key:acc) []
+getDictKeys :: Yaml.YamlElem -> [String]
+getDictKeys = Utils.foldlEMap (\acc (key, value) -> Utils.elemToStr key:acc) []
 
-printKeys :: YamlNode -> IO ()
-printKeys = putStr . unlines . getDictKeys . n_elem
+printKeys :: Yaml.YamlNode -> IO ()
+printKeys = putStr . unlines . getDictKeys . Yaml.n_elem
 
-parseTodos :: YamlElem -> [Todo]
-parseTodos = foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []
+parseTodos :: Yaml.YamlElem -> [Todo]
+parseTodos = Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []
 
-elemToTodo :: YamlElem -> Todo
+elemToTodo :: Yaml.YamlElem -> Todo
 elemToTodo elem = Todo {description = (getDescription elem), done = False}
 
 todosToString :: [Todo] -> [String]
 todosToString todoList = map (\todo -> "[" ++ (if done todo then "X" else " ") ++ "] " ++ description todo) todoList
 
-getDescription :: YamlElem -> String
-getDescription todo = elemToStr $ getValue  todo testKey (EStr $ packBuf "")
+getDescription :: Yaml.YamlElem -> String
+getDescription todo = Utils.elemToStr $ Utils.getValue todo testKey (Yaml.EStr $ Yaml.packBuf "")
 
-testKey :: YamlElem -> Bool
-testKey key = (elemToStr key) == "description"
+testKey :: Yaml.YamlElem -> Bool
+testKey key = (Utils.elemToStr key) == "description"
 
 numberise :: [String] -> [String]
 numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [1..] s)
 
-printDescriptions :: YamlNode -> IO ()
-printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . n_elem
+printDescriptions :: Yaml.YamlNode -> IO ()
+printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . Yaml.n_elem
+
 
 handleCLIArguments :: [String] -> IO ()
 handleCLIArguments [] = parseYamlFile "pouet.yaml" >>= printDescriptions
 
-main = getArgs >>= handleCLIArguments
+main = Environment.getArgs >>= handleCLIArguments

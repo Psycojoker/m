@@ -6,25 +6,25 @@ module Utils
 , getValue
 ) where
 
-import Data.Yaml.Syck
+import Data.Yaml.Syck as Yaml
 
-foldlESeq :: (a -> YamlElem -> a) -> a -> YamlElem -> a
-foldlESeq function acc (ESeq []) = acc
-foldlESeq function acc (ESeq (x:xs)) = foldlESeq function (function acc $ n_elem x) (ESeq xs)
+foldlESeq :: (a -> Yaml.YamlElem -> a) -> a -> Yaml.YamlElem -> a
+foldlESeq function acc (Yaml.ESeq []) = acc
+foldlESeq function acc (Yaml.ESeq (x:xs)) = foldlESeq function (function acc $ Yaml.n_elem x) (Yaml.ESeq xs)
 
-getValue :: YamlElem -> (YamlElem -> Bool) -> YamlElem -> YamlElem
-getValue (EMap []) _ defaultValue = defaultValue
-getValue (EMap ((key, value):xs)) test defaultValue
-    | test $ n_elem key = n_elem value
-    | otherwise         = getValue (EMap xs) test defaultValue
+getValue :: Yaml.YamlElem -> (Yaml.YamlElem -> Bool) -> Yaml.YamlElem -> Yaml.YamlElem
+getValue (Yaml.EMap []) _ defaultValue = defaultValue
+getValue (Yaml.EMap ((key, value):xs)) test defaultValue
+    | test $ Yaml.n_elem key = Yaml.n_elem value
+    | otherwise              = getValue (Yaml.EMap xs) test defaultValue
 
-foldlEMap :: (a -> (YamlElem, YamlElem) -> a) -> a -> YamlElem -> a
-foldlEMap function acc (EMap []) = acc
-foldlEMap function acc (EMap ((key, value):xs)) = foldlEMap function (function acc content) (EMap xs)
+foldlEMap :: (a -> (Yaml.YamlElem, Yaml.YamlElem) -> a) -> a -> Yaml.YamlElem -> a
+foldlEMap function acc (Yaml.EMap []) = acc
+foldlEMap function acc (Yaml.EMap ((key, value):xs)) = foldlEMap function (function acc content) (Yaml.EMap xs)
     where content = (n_elem key, n_elem value)
 
-elemToStr :: YamlElem -> String
-elemToStr (EStr string) = unpackBuf string
+elemToStr :: Yaml.YamlElem -> String
+elemToStr (Yaml.EStr string) = Yaml.unpackBuf string
 
-nodeStr :: YamlNode -> String
-nodeStr = elemToStr . n_elem
+nodeStr :: Yaml.YamlNode -> String
+nodeStr = elemToStr . Yaml.n_elem
