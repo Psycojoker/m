@@ -29,6 +29,7 @@ testKey key = (elemToStr key) == "description"
 numberise :: [String] -> [String]
 numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [1..] s)
 
+printDescriptions :: YamlNode -> IO ()
 printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . n_elem
 
 main = do
