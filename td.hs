@@ -35,4 +35,3 @@ printDescriptions = putStr . unlines . numberise . todosToString . parseTodos . 
 main = do
     content <- parseYamlFile "pouet.yaml"
     printDescriptions content
-    return ()
