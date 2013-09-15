@@ -1,10 +1,20 @@
+import Control.Monad(when)
 import qualified Utils
+import qualified System.Directory as Directory
 import qualified System.Environment as Environment
 import qualified Data.Yaml.Syck as Yaml
 
 data Todo = Todo { description :: String
                  , done :: Bool
                  } deriving (Show)
+
+-- Yes, those path should be calculated
+-- but this make the code soooooooo much more complicated :(
+dbPath :: String
+dbPath = "/home/psycojoker/.config/t/db.yaml"
+
+dbPathSubPath :: String
+dbPathSubPath = "/home/psycojoker/.config/t/"
 
 getDictKeys :: Yaml.YamlElem -> [String]
 getDictKeys = Utils.foldlEMap (\acc (key, value) -> Utils.elemToStr key:acc) []
@@ -34,7 +44,7 @@ printDescriptions :: [Todo] -> IO ()
 printDescriptions = putStr . unlines . numberise . todosToString
 
 getTodosDB :: IO Yaml.YamlNode
-getTodosDB = Yaml.parseYamlFile "pouet.yaml"
+getTodosDB = Yaml.parseYamlFile dbPath
 
 getTodos :: IO [Todo]
 getTodos = (return . parseTodos . Yaml.n_elem) =<< getTodosDB
@@ -53,7 +63,7 @@ addTodoToCollection :: String -> [Todo] -> [Todo]
 addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False}]
 
 addTodo :: String -> IO ()
-addTodo description = getTodos >>= (Yaml.emitYamlFile "/tmp/caca.yaml" . todosToYaml . addTodoToCollection description)
+addTodo description = getTodos >>= (Yaml.emitYamlFile dbPath . todosToYaml . addTodoToCollection description)
 
 printTodos :: IO ()
 printTodos = printDescriptions =<< getTodos
@@ -73,4 +83,11 @@ handleCLIArguments ("h":xs) = displayHelp
 handleCLIArguments ("help":xs) = displayHelp
 handleCLIArguments other = (putStrLn $ "I don't know this command: '" ++ (unwords other) ++ "'\n") >> displayHelp
 
-main = Environment.getArgs >>= handleCLIArguments
+checkDBExist :: IO ()
+checkDBExist = do
+            subDirExist <- Directory.doesDirectoryExist dbPathSubPath
+            when (not subDirExist) $ Directory.createDirectoryIfMissing True dbPathSubPath
+            fileExist <- Directory.doesFileExist dbPath
+            when (not fileExist) $ writeFile dbPath ""
+
+main = checkDBExist >> Environment.getArgs >>= handleCLIArguments
