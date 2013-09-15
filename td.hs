@@ -23,7 +23,8 @@ printKeys :: Yaml.YamlNode -> IO ()
 printKeys = putStr . unlines . getDictKeys . Yaml.n_elem
 
 parseTodos :: Yaml.YamlElem -> [Todo]
-parseTodos = Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []
+parseTodos Yaml.ENil = []
+parseTodos normalCase = (Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []) normalCase
 
 elemToTodo :: Yaml.YamlElem -> Todo
 elemToTodo elem = Todo {description = (getDescription elem), done = False}
