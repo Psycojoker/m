@@ -76,8 +76,10 @@ displayHelp = putStrLn "Commands: (l)ist, (a)dd, (h)elp"
 
 handleCLIArguments :: [String] -> IO ()
 handleCLIArguments [] = printTodos
+handleCLIArguments ("-l":xs) = printTodos
 handleCLIArguments ("l":xs) = printTodos
 handleCLIArguments ("list":xs) = printTodos
+handleCLIArguments ("-a":xs) = addTodo $ unwords xs
 handleCLIArguments ("a":xs) = addTodo $ unwords xs
 handleCLIArguments ("add":xs) = addTodo $ unwords xs
 handleCLIArguments ("-h":xs) = displayHelp
