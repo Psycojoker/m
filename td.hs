@@ -67,7 +67,9 @@ addTodo :: String -> IO ()
 addTodo description = getTodos >>= (Yaml.emitYamlFile dbPath . todosToYaml . addTodoToCollection description)
 
 printTodos :: IO ()
-printTodos = printDescriptions =<< getTodos
+printTodos = printDescriptionsIfTodos =<< getTodos
+    where printDescriptionsIfTodos todos = case todos of [] -> putStrLn "No todos, use the 'add' command to add one."
+                                                         other -> printDescriptions todos
 
 displayHelp :: IO ()
 displayHelp = putStrLn "Commands: (l)ist, (a)dd, (h)elp"
