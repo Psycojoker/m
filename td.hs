@@ -58,12 +58,19 @@ addTodo description = getTodos >>= (Yaml.emitYamlFile "/tmp/caca.yaml" . todosTo
 printTodos :: IO ()
 printTodos = printDescriptions =<< getTodos
 
+displayHelp :: IO ()
+displayHelp = putStrLn "Commands: (l)ist, (a)dd, (h)elp"
+
 handleCLIArguments :: [String] -> IO ()
 handleCLIArguments [] = printTodos
 handleCLIArguments ("l":xs) = printTodos
 handleCLIArguments ("list":xs) = printTodos
 handleCLIArguments ("a":xs) = addTodo $ unwords xs
 handleCLIArguments ("add":xs) = addTodo $ unwords xs
+handleCLIArguments ("-h":xs) = displayHelp
+handleCLIArguments ("--help":xs) = displayHelp
+handleCLIArguments ("h":xs) = displayHelp
+handleCLIArguments ("help":xs) = displayHelp
 handleCLIArguments _ = printTodos
 
 main = Environment.getArgs >>= handleCLIArguments
