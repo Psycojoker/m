@@ -4,6 +4,7 @@ module Utils
 , foldlEMap
 , nodeStr
 , getValue
+, numberise
 ) where
 
 import Data.Yaml.Syck as Yaml
@@ -28,3 +29,6 @@ elemToStr (Yaml.EStr string) = Yaml.unpackBuf string
 
 nodeStr :: Yaml.YamlNode -> String
 nodeStr = elemToStr . Yaml.n_elem
+
+numberise :: [String] -> [String]
+numberise s = map (\(number, string) -> (show number) ++ " - " ++ string) (zip [1..] s)
