@@ -13,11 +13,11 @@ foldlESeq :: (a -> Yaml.YamlElem -> a) -> a -> Yaml.YamlElem -> a
 foldlESeq function acc (Yaml.ESeq []) = acc
 foldlESeq function acc (Yaml.ESeq (x:xs)) = foldlESeq function (function acc $ Yaml.n_elem x) (Yaml.ESeq xs)
 
-getValue :: Yaml.YamlElem -> (Yaml.YamlElem -> Bool) -> Yaml.YamlElem -> Yaml.YamlElem
-getValue (Yaml.EMap []) _ defaultValue = defaultValue
-getValue (Yaml.EMap ((key, value):xs)) test defaultValue
-    | test $ Yaml.n_elem key = Yaml.n_elem value
-    | otherwise              = getValue (Yaml.EMap xs) test defaultValue
+getValue :: Yaml.YamlElem -> (Yaml.YamlElem -> Bool) -> Maybe Yaml.YamlElem
+getValue (Yaml.EMap []) _ = Nothing
+getValue (Yaml.EMap ((key, value):xs)) test
+    | test $ Yaml.n_elem key = Just $ Yaml.n_elem value
+    | otherwise              = getValue (Yaml.EMap xs) test
 
 foldlEMap :: (a -> (Yaml.YamlElem, Yaml.YamlElem) -> a) -> a -> Yaml.YamlElem -> a
 foldlEMap function acc (Yaml.EMap []) = acc

@@ -40,7 +40,8 @@ todosToString :: [Todo] -> [String]
 todosToString todoList = map (\todo -> "[" ++ (if done todo then "X" else " ") ++ "] " ++ description todo) todoList
 
 getDescription :: Yaml.YamlElem -> String
-getDescription todo = Utils.elemToStr $ Utils.getValue todo testKey (Yaml.EStr $ Yaml.packBuf "")
+getDescription todo = case Utils.getValue todo testKey of Just a -> Utils.elemToStr a
+                                                          Nothing -> ""
 
 testKey :: Yaml.YamlElem -> Bool
 testKey key = (Utils.elemToStr key) == "description"
