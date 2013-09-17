@@ -13,6 +13,7 @@ import qualified System.Directory as Directory
 
 data Todo = Todo { description :: String
                  , done :: Bool
+                 , todoId :: Int
                  } deriving (Show)
 
 -- Yes, those path should be calculated
@@ -34,7 +35,7 @@ parseTodos Yaml.ENil = []
 parseTodos normalCase = (Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []) normalCase
 
 elemToTodo :: Yaml.YamlElem -> Todo
-elemToTodo elem = Todo {description = (getDescription elem), done = False}
+elemToTodo elem = Todo {description = (getDescription elem), done = False, todoId = (getId elem)}
 
 todosToString :: [Todo] -> [String]
 todosToString todoList = map (\todo -> "[" ++ (if done todo then "X" else " ") ++ "] " ++ description todo) todoList
@@ -64,7 +65,11 @@ todoToEmap todo = Yaml.EMap [convertDescription, convertDone]
           boolToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
 
 addTodoToCollection :: String -> [Todo] -> [Todo]
-addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False}]
+addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False, todoId=(getNextTodoId todos)}]
+
+getNextTodoId :: [Todo] -> Int
+getNextTodoId [] = 1
+getNextTodoId todos = maximum $ map todoId todos
 
 addTodo :: String -> IO ()
 addTodo description = getTodos >>= (Yaml.emitYamlFile dbPath . todosToYaml . addTodoToCollection description)
