@@ -38,7 +38,7 @@ elemToTodo :: Yaml.YamlElem -> Todo
 elemToTodo elem = Todo {description = (getDescription elem), done = False, todoId = (getId elem)}
 
 todosToString :: [Todo] -> [String]
-todosToString todoList = map (\todo -> "[" ++ (if done todo then "X" else " ") ++ "] " ++ description todo) todoList
+todosToString = map (\todo -> (show $ todoId todo) ++ " - [" ++ (if done todo then "X" else " ") ++ "] " ++ description todo)
 
 getDescription :: Yaml.YamlElem -> String
 getDescription todo = case Utils.getValueFromToString todo "description" of Just a -> a
