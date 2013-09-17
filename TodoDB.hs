@@ -52,7 +52,17 @@ getTodosDB :: IO Yaml.YamlNode
 getTodosDB = Yaml.parseYamlFile dbPath
 
 getTodos :: IO [Todo]
-getTodos = (return . parseTodos . Yaml.n_elem) =<< getTodosDB
+getTodos = (return . fixBadIds . parseTodos . Yaml.n_elem) =<< getTodosDB
+
+fixBadIds :: [Todo] -> [Todo]
+fixBadIds [] = []
+fixBadIds todos = fixBadIds' todos $ getNextTodoId todos
+
+fixBadIds' :: [Todo] -> Int -> [Todo]
+fixBadIds' [] _ = []
+fixBadIds' (x:xs) nextId
+    | todoId x == -1 = (Todo {todoId=nextId, description=description x, done=done x}):(fixBadIds' xs $ 1 + nextId)
+    | otherwise      = x:fixBadIds' xs nextId
 
 todosToYaml :: [Todo] -> Yaml.YamlNode
 todosToYaml todos = Yaml.mkNode $ Yaml.ESeq $ map (Yaml.mkNode . todoToEmap) todos

@@ -5,7 +5,7 @@ import qualified Data.Yaml.Syck as Yaml
 
 
 printDescriptions :: [TodoDB.Todo] -> IO ()
-printDescriptions = putStr . unlines . Utils.numberise . TodoDB.todosToString
+printDescriptions = putStr . unlines . TodoDB.todosToString
 
 printTodos :: IO ()
 printTodos = printDescriptionsIfTodos =<< TodoDB.getTodos
