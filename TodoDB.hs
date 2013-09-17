@@ -40,9 +40,12 @@ todosToString :: [Todo] -> [String]
 todosToString todoList = map (\todo -> "[" ++ (if done todo then "X" else " ") ++ "] " ++ description todo) todoList
 
 getDescription :: Yaml.YamlElem -> String
-getDescription todo = case Utils.getValue todo keyIsDescription of Just a -> Utils.elemToStr a
-                                                                   Nothing -> ""
-                        where keyIsDescription key = (Utils.elemToStr key) == "description"
+getDescription todo = case Utils.getValueFromToString todo "description" of Just a -> a
+                                                                            Nothing -> ""
+
+getId :: Yaml.YamlElem -> Int
+getId todo = case Utils.getValueFromToString todo "id" of Just a -> read a :: Int
+                                                          Nothing -> -1
 
 getTodosDB :: IO Yaml.YamlNode
 getTodosDB = Yaml.parseYamlFile dbPath

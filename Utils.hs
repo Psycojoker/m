@@ -4,6 +4,7 @@ module Utils
 , foldlEMap
 , nodeStr
 , getValue
+, getValueFromToString
 , numberise
 ) where
 
@@ -12,6 +13,10 @@ import Data.Yaml.Syck as Yaml
 foldlESeq :: (a -> Yaml.YamlElem -> a) -> a -> Yaml.YamlElem -> a
 foldlESeq function acc (Yaml.ESeq []) = acc
 foldlESeq function acc (Yaml.ESeq (x:xs)) = foldlESeq function (function acc $ Yaml.n_elem x) (Yaml.ESeq xs)
+
+getValueFromToString :: Yaml.YamlElem -> String -> Maybe String
+getValueFromToString dict key = case getValue dict (\x -> (elemToStr x) == key) of Just a -> Just $ elemToStr a
+                                                                                   Nothing -> Nothing
 
 getValue :: Yaml.YamlElem -> (Yaml.YamlElem -> Bool) -> Maybe Yaml.YamlElem
 getValue (Yaml.EMap []) _ = Nothing
