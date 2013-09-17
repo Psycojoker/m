@@ -69,7 +69,8 @@ addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDesc
 
 getNextTodoId :: [Todo] -> Int
 getNextTodoId [] = 1
-getNextTodoId todos = maximum $ map todoId todos
+getNextTodoId todos = if lastId /= -1 then 1 + lastId else 1
+    where lastId = maximum $ map todoId todos
 
 addTodo :: String -> IO ()
 addTodo description = getTodos >>= (Yaml.emitYamlFile dbPath . todosToYaml . addTodoToCollection description)
