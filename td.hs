@@ -8,6 +8,7 @@ printDescriptions :: [TodoDB.Todo] -> IO ()
 printDescriptions = putStr . unlines . TodoDB.todosToString
 
 printTodos :: [String] -> IO ()
+printTodos ("-a":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
 printTodos ("a":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
 printTodos ("all":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
 printTodos _ = (printDescriptionsIfTodos . filter (\todo -> not (TodoDB.done todo))) =<< TodoDB.getTodos
