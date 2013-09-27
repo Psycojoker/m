@@ -78,9 +78,10 @@ todosToYaml :: [Todo] -> Yaml.YamlNode
 todosToYaml todos = Yaml.mkNode $ Yaml.ESeq $ map (Yaml.mkNode . todoToEmap) todos
 
 todoToEmap :: Todo -> Yaml.YamlElem
-todoToEmap todo = Yaml.EMap [convertDescription, convertDone]
+todoToEmap todo = Yaml.EMap [convertDescription, convertDone, convertId]
     where convertDescription = (stringToYamlNode "description", stringToYamlNode $ description todo)
           convertDone = (stringToYamlNode "done", stringToYamlNode $ show $ done todo)
+          convertId = (stringToYamlNode "todoId", stringToYamlNode $ show $ todoId todo)
           stringToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
           boolToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
 
