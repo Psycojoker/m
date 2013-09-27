@@ -5,6 +5,9 @@ module TodoDB
 , todosToString
 , checkDBExist
 , searchAndMarkTodoAsDone
+, done
+, description
+, todoId
 ) where
 
 import Control.Monad(when)

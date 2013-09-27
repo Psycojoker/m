@@ -7,19 +7,23 @@ import qualified Data.Yaml.Syck as Yaml
 printDescriptions :: [TodoDB.Todo] -> IO ()
 printDescriptions = putStr . unlines . TodoDB.todosToString
 
-printTodos :: IO ()
-printTodos = printDescriptionsIfTodos =<< TodoDB.getTodos
-    where printDescriptionsIfTodos todos = case todos of [] -> putStrLn "No todos, use the 'add' command to add one."
-                                                         other -> printDescriptions todos
+printTodos :: [String] -> IO ()
+printTodos ("a":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
+printTodos ("all":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
+printTodos _ = (printDescriptionsIfTodos . filter (\todo -> not (TodoDB.done todo))) =<< TodoDB.getTodos
+
+printDescriptionsIfTodos :: [TodoDB.Todo] -> IO ()
+printDescriptionsIfTodos todos = case todos of [] -> putStrLn "No todos, use the 'add' command to add one."
+                                               other -> printDescriptions todos
 
 displayHelp :: IO ()
 displayHelp = putStrLn "Commands: (l)ist, (a)dd, (h)elp"
 
 handleCLIArguments :: [String] -> IO ()
-handleCLIArguments [] = printTodos
-handleCLIArguments ("-l":xs) = printTodos
-handleCLIArguments ("l":xs) = printTodos
-handleCLIArguments ("list":xs) = printTodos
+handleCLIArguments [] = printTodos []
+handleCLIArguments ("-l":xs) = printTodos xs
+handleCLIArguments ("l":xs) = printTodos xs
+handleCLIArguments ("list":xs) = printTodos xs
 handleCLIArguments ("-a":xs) = TodoDB.addTodo $ unwords xs
 handleCLIArguments ("a":xs) = TodoDB.addTodo $ unwords xs
 handleCLIArguments ("add":xs) = TodoDB.addTodo $ unwords xs
