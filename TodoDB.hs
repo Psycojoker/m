@@ -101,7 +101,7 @@ searchAndMarkTodoAsDone query = do
     case grepTodo query todos of [] -> putStrLn $ "Todo not found, query: '" ++ query ++"'"
                                  [x] -> updateTodoCollection x todos
                                  (xs) -> putStrLn $ "Too much candidates:" ++ (show xs)
-        where setTodoHasDone todo = foldl (\acc item -> if todoId item == todoId todo then acc ++ [todo {done=True}] else acc ++ [todo]) []
+        where setTodoHasDone todo = foldl (\acc item -> if todoId item == todoId todo then acc ++ [item {done=True}] else acc ++ [item]) []
               updateTodoCollection todos = Yaml.emitYamlFile dbPath . todosToYaml . setTodoHasDone todos
 
 grepTodo :: String -> [Todo] -> [Todo]
