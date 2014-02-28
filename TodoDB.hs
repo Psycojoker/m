@@ -10,7 +10,8 @@ module TodoDB
 , todoId
 ) where
 
-import Control.Monad(when)
+import Control.Monad(when, unless)
+import Data.Maybe(fromMaybe)
 import qualified Data.Char as Char
 import qualified Data.List as List
 import qualified Utils
@@ -38,17 +39,16 @@ printKeys = putStr . unlines . getDictKeys . Yaml.n_elem
 
 parseTodos :: Yaml.YamlElem -> [Todo]
 parseTodos Yaml.ENil = []
-parseTodos normalCase = (Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) []) normalCase
+parseTodos normalCase = Utils.foldlESeq (\acc elem -> acc ++ [elemToTodo elem]) [] normalCase
 
 elemToTodo :: Yaml.YamlElem -> Todo
-elemToTodo elem = Todo {description = (getDescription elem), done = getDone elem, todoId = (getId elem)}
+elemToTodo elem = Todo {description = getDescription elem, done = getDone elem, todoId = getId elem}
 
 todosToString :: [Todo] -> [String]
-todosToString = map (\todo -> (show $ todoId todo) ++ " - [" ++ (if done todo then "X" else " ") ++ "] " ++ description todo)
+todosToString = map (\todo -> show (todoId todo) ++ " - [" ++ (if done todo then "X" else " ") ++ "] " ++ description todo)
 
 getDescription :: Yaml.YamlElem -> String
-getDescription todo = case Utils.getValueFromToString todo "description" of Just a -> a
-                                                                            Nothing -> ""
+getDescription todo = fromMaybe "" $ Utils.getValueFromToString todo "description"
 
 getId :: Yaml.YamlElem -> Int
 getId todo = case Utils.getValueFromToString todo "id" of Just a -> read a :: Int
@@ -71,7 +71,7 @@ fixBadIds todos = fixBadIds' todos $ getNextTodoId todos
 fixBadIds' :: [Todo] -> Int -> [Todo]
 fixBadIds' [] _ = []
 fixBadIds' (x:xs) nextId
-    | todoId x == -1 = (Todo {todoId=nextId, description=description x, done=done x}):(fixBadIds' xs $ 1 + nextId)
+    | todoId x == -1 = Todo {todoId=nextId, description=description x, done=done x}:fixBadIds' xs (1 + nextId)
     | otherwise      = x:fixBadIds' xs nextId
 
 todosToYaml :: [Todo] -> Yaml.YamlNode
@@ -86,7 +86,7 @@ todoToEmap todo = Yaml.EMap [convertDescription, convertDone, convertId]
           boolToYamlNode = Yaml.mkNode . Yaml.EStr . Yaml.packBuf
 
 addTodoToCollection :: String -> [Todo] -> [Todo]
-addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False, todoId=(getNextTodoId todos)}]
+addTodoToCollection todoDescription todos = todos ++ [Todo {description=todoDescription, done=False, todoId=getNextTodoId todos}]
 
 getNextTodoId :: [Todo] -> Int
 getNextTodoId [] = 1
@@ -101,8 +101,8 @@ searchAndMarkTodoAsDone query = do
     todos <- getTodos
     case grepTodo query todos of [] -> putStrLn $ "Todo not found, query: '" ++ query ++"'"
                                  [x] -> updateTodoCollection x todos
-                                 (xs) -> putStrLn $ "Too much candidates:" ++ (show xs)
-        where setTodoHasDone todo = foldl (\acc item -> if todoId item == todoId todo then acc ++ [item {done=True}] else acc ++ [item]) []
+                                 (xs) -> putStrLn $ "Too much candidates:" ++ show xs
+        where setTodoHasDone todo = foldl (\acc item -> acc ++ if todoId item == todoId todo then [item {done=True}] else [item]) []
               updateTodoCollection todos = Yaml.emitYamlFile dbPath . todosToYaml . setTodoHasDone todos
 
 grepTodo :: String -> [Todo] -> [Todo]
@@ -111,6 +111,6 @@ grepTodo query = filter $ \todo -> if all Char.isDigit query then (read query ::
 checkDBExist :: IO ()
 checkDBExist = do
             subDirExist <- Directory.doesDirectoryExist dbPathSubPath
-            when (not subDirExist) $ Directory.createDirectoryIfMissing True dbPathSubPath
+            unless subDirExist $ Directory.createDirectoryIfMissing True dbPathSubPath
             fileExist <- Directory.doesFileExist dbPath
-            when (not fileExist) $ writeFile dbPath ""
+            unless fileExist $ writeFile dbPath ""
