@@ -11,7 +11,7 @@ printTodos :: [String] -> IO ()
 printTodos ("-a":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
 printTodos ("a":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
 printTodos ("all":xs) = printDescriptionsIfTodos =<< TodoDB.getTodos
-printTodos _ = (printDescriptionsIfTodos . filter (\todo -> not (TodoDB.done todo))) =<< TodoDB.getTodos
+printTodos _ = (printDescriptionsIfTodos . filter (not . TodoDB.done)) =<< TodoDB.getTodos
 
 printDescriptionsIfTodos :: [TodoDB.Todo] -> IO ()
 printDescriptionsIfTodos todos = case todos of [] -> putStrLn "No todos, use the 'add' command to add one."
@@ -35,6 +35,6 @@ handleCLIArguments ("-h":xs) = displayHelp
 handleCLIArguments ("--help":xs) = displayHelp
 handleCLIArguments ("h":xs) = displayHelp
 handleCLIArguments ("help":xs) = displayHelp
-handleCLIArguments other = (putStrLn $ "I don't know this command: '" ++ (unwords other) ++ "'\n") >> displayHelp
+handleCLIArguments other = putStrLn ("I don't know this command: '" ++ unwords other ++ "'\n") >> displayHelp
 
 main = TodoDB.checkDBExist >> Environment.getArgs >>= handleCLIArguments
